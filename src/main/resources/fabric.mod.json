@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "chatbubbles",
+  "version": "${version}",
+  "name": "Chat Bubbles",
+  "description": "Muestra los mensajes del chat como burbujas flotantes sobre la cabeza de cada jugador.",
+  "authors": ["TuNombre"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.example.chatbubbles.ChatBubblesClient"],
+    "modmenu": ["com.example.chatbubbles.ModMenuIntegration"]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.3",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*",
+    "cloth-config": "*"
+  },
+  "suggests": { "modmenu": "*" }
+}
