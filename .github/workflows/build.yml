@@ -15,6 +15,26 @@ jobs:
         with:
           gradle-version: current
       - run: gradle build
+        id: b
+        continue-on-error: true
+      - name: Inspect
+        if: steps.b.outcome == 'failure'
+        run: |
+          J=""
+          for j in $(find $HOME/.gradle $GITHUB_WORKSPACE -name '*.jar' 2>/dev/null); do
+            if unzip -l "$j" 2>/dev/null | grep -q 'net/minecraft/client/render/Camera.class'; then J="$j"; break; fi
+          done
+          echo "MC JAR: $J"
+          unzip -l "$J" | grep -E 'client/render/RenderLayer' | awk '{print $4}'
+          for c in net.minecraft.client.render.RenderLayers net.minecraft.client.render.RenderLayer; do
+            echo "== $c"; javap -cp "$J" $c 2>&1 | grep -iE "text|entityCutout|entityTranslucent"
+          done
+          echo "== Camera"; javap -cp "$J" net.minecraft.client.render.Camera | grep -E "Vec3d|Quaternionf"
+          F=$(find $HOME/.gradle -name 'fabric-rendering-v1*.jar' ! -name '*sources*' | head -1)
+          echo "== WorldRenderContext"; javap -cp "$F" net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext
+      - name: Fail if build failed
+        if: steps.b.outcome == 'failure'
+        run: exit 1
       - uses: actions/upload-artifact@v4
         with:
           name: chatbubbles-jar
