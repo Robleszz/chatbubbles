@@ -1,7 +1,7 @@
 package com.example.chatbubbles;
 
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.network.PlayerListEntry;
@@ -42,12 +42,12 @@ public final class BubbleRenderer {
         BubbleConfig cfg = BubbleConfig.get();
         if (!cfg.enabled || mc.world == null || mc.player == null) return;
 
-        MatrixStack matrices = ctx.matrixStack();
+        MatrixStack matrices = ctx.matrices();
         VertexConsumerProvider consumers = ctx.consumers();
         if (matrices == null || consumers == null) return;
 
         Camera camera = mc.gameRenderer.getCamera();
-        Vec3d cam = camera.getPos(); // en algunas builds se llama getCameraPos()
+        Vec3d cam = camera.getCameraPos();
         float tickDelta = mc.getRenderTickCounter().getTickProgress(false);
         long now = Util.getMeasuringTimeMs();
         long lifetime = cfg.durationSeconds * 1000L;
@@ -117,14 +117,14 @@ public final class BubbleRenderer {
         // Borde + fondo
         int bgA = (int) (cfg.backgroundOpacityPercent / 100f * 255f * alpha);
         int bdA = (int) (230 * alpha);
-        VertexConsumer bg = consumers.getBuffer(RenderLayer.getTextBackground());
+        VertexConsumer bg = consumers.getBuffer(RenderLayers.getTextBackground());
         quad(bg, m, left - 1, top - 1, -left + 1, 1, 0f, (bdA << 24) | 0x6C7BFF);
         quad(bg, m, left, top, -left, 0, Z_STEP, (bgA << 24) | 0x101018);
 
         // Cabeza (cara + capa de sombrero)
         Identifier skin = skinOf(mc, uuid);
         if (skin != null) {
-            VertexConsumer vc = consumers.getBuffer(RenderLayer.getText(skin));
+            VertexConsumer vc = consumers.getBuffer(RenderLayers.getText(skin));
             int white = ((int) (255 * alpha) << 24) | 0xFFFFFF;
             float hx = left + pad, hy = top + pad;
             texQuad(vc, m, hx, hy, hx + head, hy + head, 2 * Z_STEP, 8 / 64f, 8 / 64f, 16 / 64f, 16 / 64f, white);
